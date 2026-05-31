@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # .NET API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - Gepa__ServiceUrl=http://gepa-wrapper:8000
+      - Gepa__CallbackBaseUrl=http://api:8080
+    depends_on:
+      gepa-wrapper:
+        condition: service_healthy
+    networks:
+      - gepa-net
+
+  # Python GEPA Wrapper
+  gepa-wrapper:
+    build:
+      context: ./python-wrapper
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LOG_LEVEL=INFO
+      - PORT=8000
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - gepa-net
+
+networks:
+  gepa-net:
+    driver: bridge
+    restart: unless-stopped
+
+  # C# ASP.NET API (uncomment when ready)
+  # gepa-api:
+  #   build:
+  #     context: ./src/Gepa.Net.Api
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "5000:8080"
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - AWS_REGION=us-east-1
+  #     - AWS_ACCESS_KEY_ID=test
+  #     - AWS_SECRET_ACCESS_KEY=test
+  #     - AWS_ENDPOINT_URL=http://localstack:4566
+  #     - SQS_REQUEST_QUEUE_URL=http://localstack:4566/000000000000/gepa-optimization-requests
+  #     - SQS_RESPONSE_QUEUE_URL=http://localstack:4566/000000000000/gepa-optimization-results
+  #     - DYNAMODB_TABLE_NAME=gepa-jobs
+  #   depends_on:
+  #     - localstack
+  #     - gepa-worker
+
+volumes:
+  localstack-data:

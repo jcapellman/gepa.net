@@ -1,0 +1,12 @@
+gepa>=0.1.1
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.10.0
+httpx>=0.27.0
+python-dotenv>=1.0.0
+
+# Production server
+gunicorn>=23.0.0
+
+# AWS SDK (optional, for production deployment)
+boto3>=1.35.0
