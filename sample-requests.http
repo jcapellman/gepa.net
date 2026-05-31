@@ -1,0 +1,93 @@
+# Sample API Requests for GEPA.NET
+
+## 1. Upload and Optimize a Prompt
+
+POST http://localhost:5000/api/prompts/upload
+Content-Type: application/json
+
+{
+  "promptId": "math-helper-v1",
+  "seedPrompt": "You are a helpful math tutor. Answer concisely.",
+  "trainingSet": [
+    {
+      "input": "What is 2+2?",
+      "expectedOutput": "4"
+    },
+    {
+      "input": "Calculate 5*6",
+      "expectedOutput": "30"
+    },
+    {
+      "input": "What is 100 divided by 4?",
+      "expectedOutput": "25"
+    }
+  ],
+  "validationSet": [
+    {
+      "input": "What is 7+8?",
+      "expectedOutput": "15"
+    },
+    {
+      "input": "Calculate 9*3",
+      "expectedOutput": "27"
+    }
+  ],
+  "maxMetricCalls": 100,
+  "taskLanguageModel": "openai/gpt-4.1-mini",
+  "reflectionLanguageModel": "openai/gpt-4o"
+}
+
+### Response
+# Save the jobId from the response
+
+###
+
+## 2. Check Optimization Status
+
+GET http://localhost:5000/api/prompts/math-helper-v1/status?jobId=550e8400-e29b-41d4-a716-446655440000
+
+###
+
+## 3. Health Check - C# API
+
+GET http://localhost:5000/health
+
+###
+
+## 4. Health Check - Python GEPA Service
+
+GET http://localhost:8000/health
+
+###
+
+## 5. Cancel an Optimization
+
+DELETE http://localhost:5000/api/prompts/math-helper-v1/cancel?jobId=550e8400-e29b-41d4-a716-446655440000
+
+###
+
+## 6. Direct Python GEPA Service Test
+
+POST http://localhost:8000/optimize
+Content-Type: application/json
+
+{
+  "prompt_id": "test-direct",
+  "seed_prompt": "Answer briefly.",
+  "trainset": [
+    {
+      "input": "What is 5+5?",
+      "expected_output": "10"
+    }
+  ],
+  "valset": [
+    {
+      "input": "What is 3+3?",
+      "expected_output": "6"
+    }
+  ],
+  "callback_url": "http://api:8080/api/prompts/optimization-callback",
+  "max_metric_calls": 50
+}
+
+###
